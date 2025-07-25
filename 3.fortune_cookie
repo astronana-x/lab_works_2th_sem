@@ -1,0 +1,76 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+void split_into_paragraphs(ifstream& file, vector<string>& paragraphs) {
+    string line;
+    string buffer;//накапливает текущий абзац
+
+    while (getline(file, line)) {// читает одну строку из файла file и сохраняет её в переменную line
+        if (line.empty()) {
+            if (!buffer.empty()) {
+                paragraphs.push_back(buffer);//Добавляет содержимое буфера (текущий собранный абзац) в вектор абзацев paragraphs
+                buffer.clear();//Очищает буфер, чтобы начать сбор нового абзаца
+            }
+        } else {
+            buffer += line + '\n';//Если строка не пустая, она добавляется в буфер текущего абзаца
+//К строке добавляется символ новой строки \n, так как getline его отбрасывает при чтении
+        }
+    }
+
+    // Добавляем последний абзац, если файл не заканчивается пустой строкой
+    if (!buffer.empty()) {
+        paragraphs.push_back(buffer);
+    }
+}
+
+void print_paragraphs(const vector<string>& paragraphs) {
+    int choice;
+    while (true) {
+        cout << "\n[1] Choose a fortune cookie\n[2] Exit\nEnter number of your choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1: {
+                int count = paragraphs.size();
+                cout << "Count of cookies = " << count << "\n";
+                cout << "Choose your cookie (1-" << count << "): ";
+                int n;
+                cin >> n;
+                if (n < 1 || n > count) {
+                    cout << "Invalid number.\n";
+                } else {
+                    cout << "\n--- Message for you " << n << " ---\n";
+                    cout << paragraphs[n - 1] << endl;
+                }
+                break;
+            }
+            case 2:
+                return;
+            default:
+                cout << "Invalid choice.\n";
+        }
+    }
+}
+
+int main() {
+    ifstream file("rrr.txt");
+    if (!file.is_open()) {
+        cerr << "Failed to open file.\n";
+        return 1;
+    }
+
+    vector<string> paragraphs;
+    split_into_paragraphs(file, paragraphs);
+    file.close();
+
+    if (paragraphs.empty()) {
+        cout << "No found.\n";
+        return 0;
+    }
+
+    print_paragraphs(paragraphs);
+    return 0;
+}
